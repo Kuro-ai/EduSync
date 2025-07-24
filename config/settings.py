@@ -28,10 +28,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 VT_API_KEY = os.environ.get('VT_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = True
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME] if RENDER_EXTERNAL_HOSTNAME else []
+# ALLOWED_HOSTS =[]
 
 
 # Application definition
