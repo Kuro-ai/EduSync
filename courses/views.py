@@ -209,16 +209,24 @@ def delete_module(request, module_id):
 @login_required
 def add_lesson(request, module_id):
     module = get_object_or_404(Module, id=module_id, course__instructor=request.user)
+    MAX_FILE_SIZE_MB = 10
 
     if request.method == 'POST':
         form = LessonForm(request.POST, request.FILES)
         files = request.FILES.getlist('files')  
         if form.is_valid():
+            for f in files:
+                if f.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+                    messages.error(request, f"File '{f.name}' exceeds the max size of {MAX_FILE_SIZE_MB} MB.")
+                    return render(request, 'courses/lesson/add_lesson.html', {'form': form, 'module': module})
+
             lesson = form.save(commit=False)
             lesson.module = module
             lesson.save()
+
             for f in files:
                 LessonFile.objects.create(lesson=lesson, file=f)
+
             return redirect('course_detail', course_id=module.course.id)
     else:
         form = LessonForm()
@@ -229,13 +237,23 @@ def add_lesson(request, module_id):
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, module__course__instructor=request.user)
     module = lesson.module
-
+    MAX_FILE_SIZE_MB = 10
     if request.method == 'POST':
         form = LessonForm(request.POST, instance=lesson)
         files = request.FILES.getlist('files')
         file_formset = LessonFileFormSet(request.POST, request.FILES, queryset=lesson.files.all(), prefix='files')
 
         if form.is_valid() and file_formset.is_valid():
+            for f in files:
+                if f.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+                    messages.error(request, f"File '{f.name}' exceeds the max size of {MAX_FILE_SIZE_MB} MB.")
+                    return render(request, 'courses/lesson/edit_lesson.html', {
+                        'form': form,
+                        'file_formset': file_formset,
+                        'lesson': lesson,
+                        'module': module,
+                    })
+
             form.save()
 
             for file_form in file_formset:
@@ -261,6 +279,7 @@ def edit_lesson(request, lesson_id):
         'lesson': lesson,
         'module': module,
     })
+
 
 @login_required
 def delete_lesson(request, lesson_id):
