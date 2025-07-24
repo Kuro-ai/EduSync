@@ -1,0 +1,132 @@
+<div class="overflow-x-auto">
+  <table class="min-w-full border-collapse border border-gray-300 text-sm w-full">
+    <thead class="bg-gray-100 text-gray-700 uppercase text-left hidden md:table-header-group">
+      <tr>
+        <th class="border border-gray-300 px-4 py-3">Reported By</th>
+        <th class="border border-gray-300 px-4 py-3">Course</th>
+        <th class="border border-gray-300 px-4 py-3">Reason</th>
+        <th class="border border-gray-300 px-4 py-3">Timestamp</th>
+        <th class="border border-gray-300 px-4 py-3 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="block md:table-row-group">
+      {% for report in reports %}
+      <tr class="block md:table-row border border-gray-300 rounded-md mb-4 md:mb-0 md:border-0 md:rounded-none bg-white shadow-sm md:bg-transparent hover:bg-gray-50 transition-colors">
+        <td class="block md:table-cell px-4 py-2 max-w-xs truncate" title="{{ report.reporter.email }}">
+          <span class="inline-block md:hidden font-medium text-gray-500 mb-1">Reported By:</span>
+          {{ report.reporter.email|slice:":30" }}{% if report.reporter.email|length > 30 %}…{% endif %}
+        </td>
+        <td class="block md:table-cell px-4 py-2 max-w-xs truncate" title="{{ report.course.title }}">
+          <span class="inline-block md:hidden font-medium text-gray-500 mb-1">Course:</span>
+          <a href="{% url 'course_detail' report.course.id %}" class="text-blue-600 hover:underline font-medium block">
+            {{ report.course.title|slice:":30" }}{% if report.course.title|length > 30 %}…{% endif %}
+          </a>
+        </td>
+        <td class="block md:table-cell px-4 py-2 relative max-w-sm">
+          <span class="inline-block md:hidden font-medium text-gray-500 mb-1">Reason:</span>
+
+          <button
+            type="button"
+            class="text-left text-gray-800 underline"
+            onclick="toggleTooltip('tooltip-{{ forloop.counter }}')"
+          >
+            {{ report.reason|slice:":25" }}{% if report.reason|length > 25 %}…{% endif %}
+          </button>
+
+          <div
+            id="tooltip-{{ forloop.counter }}"
+            class="hidden absolute z-50 top-full mt-2 left-0 w-72 max-w-[90vw] p-4 bg-white border border-gray-300 rounded-lg shadow-xl text-sm text-gray-800"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <strong class="text-gray-700">Full Reason</strong>
+              <button onclick="toggleTooltip('tooltip-{{ forloop.counter }}')" class="text-gray-500 hover:text-red-500 text-sm">&times;</button>
+            </div>
+            <div class="max-h-48 overflow-y-auto whitespace-pre-wrap">
+              {{ report.reason }}
+            </div>
+          </div>
+        </td>
+        <td class="block md:table-cell px-4 py-2 whitespace-nowrap">
+          <span class="inline-block md:hidden font-medium text-gray-500 mb-1">Timestamp:</span>
+          {{ report.created_at|date:"Y-m-d H:i" }}
+        </td>
+        <td class="block md:table-cell px-4 py-2 text-center whitespace-nowrap">
+          <span class="inline-block md:hidden font-medium text-gray-500 mb-1">Actions:</span>
+          <form method="post"
+              action="{% url 'toggle_course_approval' report.course.id %}?next={{ request.get_full_path|urlencode }}"
+              class="inline-block"
+              onsubmit="return confirmAction(this);">
+
+            {% csrf_token %}
+            {% if report.course.is_approved %}
+              <button
+                type="submit"
+                class="px-4 py-1 text-xs font-semibold bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-white rounded transition"
+              >
+                Revoke
+              </button>
+            {% else %}
+              <button
+                type="submit"
+                class="px-4 py-1 text-xs font-semibold bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-white rounded transition"
+              >
+                Approve
+              </button>
+            {% endif %}
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr class="block md:table-row">
+        <td colspan="5" class="block px-4 py-6 text-center text-gray-500 italic">No reports found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+  <nav class="mt-6 flex justify-center flex-wrap gap-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">← Prev</a>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+        {% if num == page_obj.number %}
+          <span class="px-3 py-1 bg-blue-600 text-white rounded">{{ num }}</span>
+        {% else %}
+          <a href="?page={{ num }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">{{ num }}</a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Next →</a>
+    {% endif %}
+  </nav>
+{% endif %}
+
+<script>
+  function toggleTooltip(id) {
+    const tooltip = document.getElementById(id);
+    if (!tooltip) return;
+
+    document.querySelectorAll('[id^="tooltip-"]').forEach(el => {
+      if (el.id !== id) el.classList.add('hidden');
+    });
+
+    tooltip.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('[id^="tooltip-"]').forEach(tooltip => {
+      if (!tooltip.contains(e.target) && !e.target.closest('button[onclick^="toggleTooltip"]')) {
+        tooltip.classList.add('hidden');
+      }
+    });
+  });
+
+  function confirmAction(form) {
+    const isApproved = form.querySelector('button').textContent.trim().toLowerCase() === 'revoke';
+    return confirm(`Are you sure you want to ${isApproved ? 'revoke' : 'approve'} this course?`);
+  }
+</script>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-8">
+    <h2 class="text-3xl font-semibold mb-6 text-gray-800">Post New Announcement for {{ course.title }}</h2>
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit" 
+              class="w-full py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 transition">
+        Post
+      </button>
+    </form>
+  </div>
+{% endblock %}

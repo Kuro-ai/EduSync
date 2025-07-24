@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EduSync</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<nav class="bg-indigo-600 shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="{% url 'dashboard' %}" class="text-xl font-bold text-white">Edu<span class="text-yellow-300">Sync</span></a>
+
+      <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="{% url 'admin_dashboard' %}" class="{% if request.path == '/admin/' %}text-yellow-300{% else %}text-white hover:text-indigo-200{% endif %} transition">
+              Admin Dashboard
+            </a>
+          {% endif %}
+          <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-yellow-300{% else %}text-white hover:text-indigo-200{% endif %} transition">
+            Dashboard
+          </a>
+          <a href="{% url 'browse_courses' %}" class="{% if request.path == '/browse/' %}text-yellow-300{% else %}text-white hover:text-indigo-200{% endif %} transition">
+            Browse
+          </a>
+
+          <div class="relative flex items-center space-x-3">
+            <button id="dropdownToggle" class="relative flex items-center space-x-2 focus:outline-none text-white">
+              {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white object-cover">
+              {% else %}
+                <div class="w-8 h-8 bg-yellow-400 text-indigo-900 rounded-full flex items-center justify-center font-semibold">
+                  {{ user.full_name|default:user.email|slice:":1"|upper }}
+                </div>
+              {% endif %}
+
+              {% if unread_notifications_count > 0 %}
+                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 animate-pulse">
+                  {{ unread_notifications_count }}
+                </span>
+              {% endif %}
+
+              <div class="flex flex-col text-left text-white">
+                <span class="text-sm font-semibold truncate">{{ user.full_name }}</span>
+                <span class="text-xs text-indigo-200 truncate">{{ user.email }}</span>
+              </div>
+            </button>
+
+            <div id="dropdownMenu" class="absolute right-0 top-12 w-44 bg-white rounded-md shadow-lg py-2 opacity-0 invisible transition duration-200 ease-out z-50">
+              <a href="{% url 'notification_list' %}" class="relative block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Notifications
+                {% if unread_notifications_count > 0 %}
+                <span class="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full px-1 py-0.5 leading-none animate-pulse">
+                  {{ unread_notifications_count }}
+                </span>
+                {% endif %}
+              </a>
+              <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">Logout</a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="text-white hover:text-indigo-200 transition">Login</a>
+        {% endif %}
+      </div>
+
+      <div class="md:hidden flex items-center">
+        <button id="mobile-menu-toggle" class="text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="md:hidden hidden px-4 pt-2 pb-4 space-y-2 text-sm font-medium bg-indigo-600 border-t border-indigo-500">
+    {% if user.is_authenticated %}
+      {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" class="block text-white hover:text-yellow-300">Admin Dashboard</a>
+      {% endif %}
+      <a href="{% url 'dashboard' %}" class="block text-white hover:text-yellow-300">Dashboard</a>
+      <a href="{% url 'browse_courses' %}" class="block text-white hover:text-yellow-300">Browse</a>
+      <a href="{% url 'notification_list' %}" class="relative block text-white hover:text-yellow-300">
+        Notifications
+        {% if unread_notifications_count > 0 %}
+        <span class="absolute top-0 right-0 transform translate-x-2 -translate-y-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none animate-pulse">
+          {{ unread_notifications_count }}
+        </span>
+        {% endif %}
+      </a>
+      <a href="{% url 'profile' %}" class="block text-white hover:text-yellow-300">Profile</a>
+      <a href="{% url 'logout' %}" class="block text-white hover:text-red-300">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="block text-white hover:text-indigo-200">Login</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main class="flex-grow max-w-5xl mx-auto px-4 py-6">
+  {% block content %}
+  {% endblock %}
+</main>
+
+<footer class="bg-indigo-600 border-t border-indigo-500 py-4 text-center text-sm text-white">
+  &copy; {% now "Y" %} EduSync. All rights reserved.
+  <br>
+  <a href="{% url 'privacy_policy' %}" class="hover:text-indigo-200 underline">Privacy Policy</a> |
+  <a href="{% url 'terms_of_service' %}" class="hover:text-indigo-200 underline">Terms of Service</a> |
+  <a href="{% url 'faq' %}" class="hover:text-indigo-200 underline">FAQs</a>
+</footer>
+
+<script>
+  const toggleBtn = document.getElementById("mobile-menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  toggleBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+
+  const dropdownToggle = document.getElementById('dropdownToggle');
+  const dropdownMenu = document.getElementById('dropdownMenu');
+
+  document.addEventListener('click', function (e) {
+    const isInside = dropdownToggle.contains(e.target) || dropdownMenu.contains(e.target);
+    if (isInside) {
+      dropdownMenu.classList.toggle('opacity-0');
+      dropdownMenu.classList.toggle('invisible');
+    } else {
+      dropdownMenu.classList.add('opacity-0');
+      dropdownMenu.classList.add('invisible');
+    }
+  });
+</script>
+
+</body>
+</html>

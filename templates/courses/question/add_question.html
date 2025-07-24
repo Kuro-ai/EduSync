@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-8 bg-white rounded-lg shadow-md mt-8">
+
+  {% if messages %}
+    <div class="mb-4 space-y-2">
+      {% for message in messages %}
+        <div class="px-4 py-3 rounded border
+          {% if message.tags == 'error' %}border-red-400 bg-red-100 text-red-700
+          {% elif message.tags == 'success' %}border-green-400 bg-green-100 text-green-700
+          {% else %}border-gray-300 bg-gray-100 text-gray-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+    ➕ Add Question to Quiz: <span class="text-blue-600">{{ quiz.title }}</span>
+  </h2>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      {{ form.question_type.label_tag }}
+      {{ form.question_type }}
+    </div>
+
+    <div>
+      {{ form.question_text.label_tag }}
+      {{ form.question_text }}
+      <div id="fill-blank-tip" class="mt-2 text-sm text-blue-600 hidden">
+        💡 Tip: Use <code>[blank]</code> to indicate a blank. It will be shown as an underline when students take the quiz.
+      </div>
+    </div>
+
+    <div>
+      {{ form.choices.label_tag }}
+      {{ form.choices }}
+    </div>
+
+    <div>
+      {{ form.correct_answer.label_tag }}
+      {{ form.correct_answer }}
+    </div>
+
+    <div>
+      {{ form.explanation.label_tag }}
+      {{ form.explanation }}
+    </div>
+
+    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold">
+      ➕ Add Question
+    </button>
+    <a href="{% url 'view_quiz' quiz.id %}" 
+       class="ml-3 inline-block px-5 py-2 border border-gray-500 text-gray-700 rounded hover:bg-gray-100 transition font-semibold">
+      ✅ Done
+    </a>
+  </form>
+
+</div>
+
+<style>
+  .underline-input {
+    border: none;
+    border-bottom: 2px solid #94a3b8;
+    border-radius: 0;
+    background-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .underline-input:focus {
+    outline: none;
+    border-bottom-color: #2563eb;
+  }
+
+  input[disabled].underline-input {
+    border-bottom-style: dashed;
+    border-bottom-color: #9ca3af;
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const questionTypeField = document.getElementById("id_question_type");
+  const choicesField = document.getElementById("id_choices");
+  const correctAnswerField = document.getElementById("id_correct_answer");
+  const fillBlankTip = document.getElementById("fill-blank-tip");
+
+  function toggleFields() {
+    const isMCQ = questionTypeField.value === "MCQ";
+    const isFILL = questionTypeField.value === "FB";
+
+    choicesField.disabled = !isMCQ;
+    choicesField.required = isMCQ;
+    choicesField.value = isMCQ ? choicesField.value : "";
+    choicesField.placeholder = isMCQ ? "Comma-separated choices" : "Disabled for this question type";
+    choicesField.classList.toggle("bg-gray-100", !isMCQ);
+    choicesField.classList.toggle("cursor-not-allowed", !isMCQ);
+
+
+    if (isFILL) {
+      correctAnswerField.classList.add("underline-input");
+      fillBlankTip.classList.remove("hidden");
+    } else {
+      correctAnswerField.classList.remove("underline-input");
+      fillBlankTip.classList.add("hidden");
+    }
+  }
+
+  toggleFields();
+  questionTypeField.addEventListener("change", toggleFields);
+});
+</script>
+{% endblock %}

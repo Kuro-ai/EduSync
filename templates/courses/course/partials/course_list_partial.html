@@ -1,0 +1,18 @@
+{% for course in courses %}
+  <li>
+    <a href="{% url 'course_detail' course.id %}" class="block border border-gray-200 p-5 rounded-lg shadow hover:shadow-md transition bg-white h-full hover:bg-gray-50">
+      <div class="text-lg font-semibold text-blue-700 mb-2">
+        {{ course.title }}
+      </div>
+      <p class="text-sm text-gray-600 mb-2">
+        👤 {{ course.instructor.full_name }}<br> 
+        🗓️ {{ course.created_at|date:"Y-m-d" }}
+      </p>
+      <p class="text-gray-700 text-sm">
+        {{ course.description|truncatewords_html:20|safe }}
+      </p>
+    </a>
+  </li>
+{% empty %}
+  <li class="col-span-full text-gray-500 italic">No courses found matching your filters.</li>
+{% endfor %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto mt-12 p-6 text-center bg-white rounded-lg shadow-lg">
+    <h2 class="text-3xl font-bold text-green-600 mb-4">🎉 Email Verified!</h2>
+    <p class="text-lg mb-6">{{ message }}</p>
+    <p>You’ll be redirected to your dashboard in a few seconds...</p>
+    <a href="{{ redirect_url }}" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+        Go to Dashboard Now
+    </a>
+</div>
+
+<script>
+    setTimeout(function() {
+        window.location.href = "{{ redirect_url }}";
+    }, 3000);  // 3 seconds
+</script>
+{% endblock %}

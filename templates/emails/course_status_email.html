@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Course {{ status|title }} Notification</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f7fa; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          <tr>
+            <td style="padding: 30px; text-align: center; background-color: #4f46e5;">
+              <h1 style="margin: 0; font-size: 24px; color: #ffffff;">EduSync</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px;">
+              <h2 style="font-size: 20px; margin-bottom: 20px; color: #333;">
+                Hello {{ user.full_name }},
+              </h2>
+              <p style="font-size: 16px; color: #444; line-height: 1.6;">
+                We wanted to inform you that your course titled <strong>"{{ course.title }}"</strong> has been <span style="color: {% if status == 'approved' %}green{% else %}red{% endif %}; font-weight: bold;">{{ status }}</span> by our moderation team.
+              </p>
+              <p style="font-size: 16px; color: #444; line-height: 1.6;">
+                You can log in to your dashboard to view the details or make updates if needed.
+              </p>
+              <p style="font-size: 14px; color: #999;">
+                If you believe this action was a mistake, feel free to contact support.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px; text-align: center; background-color: #f0f0f0; font-size: 12px; color: #888;">
+              &copy; {% now "Y" %} EduSync. All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

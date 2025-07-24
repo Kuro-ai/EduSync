@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-8 bg-white rounded-lg shadow-md mt-8">
+
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">👁️ Quiz for: <span class="text-blue-600">{{ lesson.title }}</span></h2>
+
+  <div class="mb-6 text-gray-700">
+    <p><strong>Total Attempts Allowed:</strong> {{ quiz.max_attempts }}</p>
+    <p><strong>Time Limit:</strong>
+      {% if quiz.time_limit > 0 %}
+        {{ quiz.time_limit }} minutes
+      {% else %}
+        No time limit
+      {% endif %}
+    </p>
+  </div>
+
+  {% if is_instructor %}
+    <div class="mb-6">
+      <a href="{% url 'add_question' quiz.id %}" 
+         class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold">
+        ➕ Add Question
+      </a>
+    </div>
+  {% endif %}
+
+  {% if question_forms %}
+    <form method="post" id="quiz-form" class="space-y-6">
+      {% csrf_token %}
+      {% for form, question in question_forms %}
+        <div id="question-{{ forloop.counter }}" class="border rounded-md p-4 shadow-sm bg-gray-50">
+
+          <h5 class="font-semibold mb-3 text-lg">Question {{ forloop.counter }}</h5>
+
+          {{ form.non_field_errors }}
+
+          <div class="mb-3">
+            {{ form.question_text.label_tag }}
+            {{ form.question_text|add_class:"w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" }}
+            <script>document.getElementById("{{ form.question_text.id_for_label }}").setAttribute("disabled", "disabled");</script>
+          </div>
+
+          <div class="mb-3">
+            {{ form.question_type.label_tag }}
+            {{ form.question_type|add_class:"w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" }}
+            <script>document.getElementById("{{ form.question_type.id_for_label }}").setAttribute("disabled", "disabled");</script>
+          </div>
+
+          <div class="mb-3">
+            {{ form.choices.label_tag }}
+            {{ form.choices|add_class:"w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" }}
+            <script>document.getElementById("{{ form.choices.id_for_label }}").setAttribute("disabled", "disabled");</script>
+          </div>
+
+          <div class="mb-3">
+            {{ form.correct_answer.label_tag }}
+            {{ form.correct_answer|add_class:"w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" }}
+            <script>document.getElementById("{{ form.correct_answer.id_for_label }}").setAttribute("disabled", "disabled");</script>
+          </div>
+
+          <div class="mb-3">
+            {{ form.explanation.label_tag }}
+            {{ form.explanation|add_class:"w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" }}
+            <script>document.getElementById("{{ form.explanation.id_for_label }}").setAttribute("disabled", "disabled");</script>
+          </div>
+
+          {% if is_instructor %}
+            <div class="flex space-x-3 mt-2">
+              <a href="{% url 'edit_question' question.id %}" 
+                 class="px-3 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition text-sm">
+                ✏️ Edit
+              </a>
+              <button type="button" 
+                      class="px-3 py-1 border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition text-sm"
+                      onclick="confirmDelete('question', {{ question.id }})">
+                🗑️ Delete
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <a href="{% url 'course_detail' lesson.module.course.id %}" 
+         class="inline-block mt-6 px-5 py-2 border border-gray-500 text-gray-700 rounded hover:bg-gray-100 transition font-semibold">
+        🔙 Back to Course
+      </a>
+    </form>
+  {% else %}
+    <p class="italic text-gray-600">No questions in this quiz yet.</p>
+    <a href="{% url 'course_detail' lesson.module.course.id %}" 
+       class="inline-block mt-6 px-5 py-2 border border-gray-500 text-gray-700 rounded hover:bg-gray-100 transition font-semibold">
+      🔙 Back to Course
+    </a>
+  {% endif %}
+
+  <form id="delete-form" method="post" style="display:none;">
+    {% csrf_token %}
+  </form>
+</div>
+
+<script>
+  function confirmDelete(type, id) {
+    if (confirm(`Are you sure you want to permanently delete this ${type}?`)) {
+      const form = document.getElementById('delete-form');
+      form.action = `/courses/question/${id}/delete/`; 
+      form.submit();
+    }
+  }
+</script>
+{% endblock %}

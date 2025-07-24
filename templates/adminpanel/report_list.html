@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="p-6 bg-white rounded-xl shadow-md">
+  <h2 class="text-2xl font-semibold mb-4">Reports</h2>
+
+  <form method="get" id="report-filter-form" class="mb-4 flex flex-wrap items-center gap-4">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search by email or course"
+      value="{{ query }}"
+      class="border rounded px-3 py-2 w-64"
+      id="live-search"
+    />
+    <input
+      type="date"
+      name="date"
+      value="{{ date }}"
+      class="border rounded px-3 py-2"
+      id="date-filter"
+    />
+    <select
+      name="status"
+      class="border rounded px-3 py-2"
+      id="status-filter"
+    >
+      <option value="">All Status</option>
+      <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+      <option value="revoked" {% if status == 'revoked' %}selected{% endif %}>Revoked</option>
+    </select>
+    <a href="{% url 'report_list' %}" class="bg-gray-200 text-gray-800 rounded px-3 py-2 hover:bg-gray-300">Clear</a>
+  </form>
+
+  <div id="report-results">
+    {% include "adminpanel/partials/report_table.html" %}
+  </div>
+</div>
+
+<script>
+  function debounce(callback, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => callback.apply(this, args), delay);
+    };
+  }
+
+  const form = document.getElementById('report-filter-form');
+  const search = document.getElementById('live-search');
+  const status = document.getElementById('status-filter');
+  const date = document.getElementById('date-filter');
+  const resultsContainer = document.getElementById('report-results');
+
+  function fetchReports(page = 1) {
+    const params = new URLSearchParams(new FormData(form));
+    params.set('page', page);
+
+    fetch("{% url 'report_list' %}?" + params.toString(), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      resultsContainer.innerHTML = data.html;
+    });
+  }
+
+  const debouncedFetch = debounce(() => fetchReports(1), 300);
+
+  search.addEventListener('input', debouncedFetch);
+  status.addEventListener('change', () => fetchReports(1));
+  date.addEventListener('change', () => fetchReports(1));
+
+  resultsContainer.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && e.target.closest('.pagination')) {
+      e.preventDefault();
+      const url = new URL(e.target.href, window.location.origin);
+      const page = url.searchParams.get('page') || 1;
+      fetchReports(page);
+    }
+  });
+
+  function confirmDelete(reportCourseId) {
+    if (confirm("Are you sure you want to delete this course permanently?")) {
+      document.getElementById(`delete-form-${reportCourseId}`).submit();
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% if courses %}
+  <div class="space-y-4">
+    {% for course in courses %}
+      {% if not course.is_approved or course.modules.exists %}
+        <div class="bg-white shadow-md rounded-lg p-5 border border-gray-200">
+           <div class="flex justify-between items-center w-full text-gray-900 font-semibold text-lg">
+              <button
+                class="text-left hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded transition"
+                onclick="toggleCourseDetails('{{ course.id }}')"
+                aria-expanded="false"
+                aria-controls="course-{{ course.id }}-details"
+              >
+                📘 {{ course.title }}
+              </button>
+              <form method="POST"
+                action="{% url 'toggle_course_approval' course.id %}?next={{ request.get_full_path|urlencode }}"
+                onsubmit="return confirm('Are you sure you want to {% if course.is_approved %}revoke{% else %}approve{% endif %} this course?');"
+                class="inline">
+
+                {% csrf_token %}
+                <button type="submit"
+                        class="{% if course.is_approved %}text-red-600{% else %}text-green-600{% endif %} hover:underline font-normal text-sm">
+                  {% if course.is_approved %}
+                    ❗Revoke
+                  {% else %}
+                    ✅ Approve
+                  {% endif %}
+                </button>
+              </form>
+            </div>
+
+          <div id="course-{{ course.id }}-details" class="hidden mt-4 space-y-3 text-gray-700">
+            <p><strong>Instructor Name:</strong> {{ course.instructor.full_name }}</p>
+            <p><strong>Instructor Email:</strong> {{ course.instructor.email }}</p>
+            <p><strong>Description:</strong> {{ course.description|truncatewords:20 }}</p>
+            <p><strong>Created:</strong> {{ course.created_at|date:"Y-m-d" }}</p>
+
+            {% if course.modules.exists %}
+              <details class="ml-6 mt-3 border-l-2 border-gray-300 pl-4">
+                <summary class="cursor-pointer font-semibold text-gray-800 hover:text-blue-600">📂 Modules ({{ course.modules.count }})</summary>
+                <div class="mt-3 space-y-3">
+                  {% for module in course.modules.all %}
+                    <details class="ml-6 border-l border-gray-300 pl-4">
+                      <summary class="cursor-pointer font-medium text-gray-700 hover:text-blue-500">📁 {{ module.title }}</summary>
+                      <div class="mt-2 ml-4 space-y-2 text-sm">
+                        <p><strong>Description:</strong> {{ module.description|truncatewords:15 }}</p>
+                        <p><strong>Order:</strong> {{ module.order }}</p>
+
+                        {% if module.lessons.exists %}
+                          <details class="ml-6 mt-1 border-l border-gray-300 pl-4">
+                            <summary class="cursor-pointer font-medium text-gray-700 hover:text-blue-500">📄 Lessons ({{ module.lessons.count }})</summary>
+                            <div class="mt-2 ml-4 space-y-3 text-xs">
+                              {% for lesson in module.lessons.all %}
+                                <details>
+                                  <summary class="cursor-pointer">📑 {{ lesson.title }}</summary>
+                                  <div class="mt-1 ml-4 space-y-1">
+                                    <p><strong>Description:</strong> {{ lesson.description|truncatewords:15 }}</p>
+                                    <p>
+                                      <strong>File:</strong>
+                                      {% if lesson.file %}
+                                        <a href="{{ lesson.file.url }}" target="_blank" class="text-blue-600 hover:underline">Download</a>
+                                      {% else %}None{% endif %}
+                                    </p>
+                                    <p>
+                                      <strong>Video URL:</strong>
+                                      {% if lesson.video_url %}
+                                        <a href="{{ lesson.video_url }}" target="_blank" class="text-blue-600 hover:underline block max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                                          {{ lesson.video_url|truncatechars:40 }}
+                                        </a>
+
+                                      {% else %}None{% endif %}
+                                    </p>
+
+                                    {% if lesson.quiz %}
+                                      <div class="ml-4 mt-2 p-2 border border-yellow-300 rounded bg-yellow-50">
+                                        <p>📝 Quiz: {{ lesson.quiz.title }}</p>
+                                        <p class="text-xs text-gray-500">Created: {{ lesson.quiz.created_at|date:"Y-m-d" }}</p>
+                                        <a href="{% url 'view_quiz' lesson.id %}" class="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">👁️ View Questions</a>
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                </details>
+                              {% endfor %}
+                            </div>
+                          </details>
+                        {% endif %}
+                      </div>
+                    </details>
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-gray-600 italic text-center py-10">No content available for approval.</p>
+{% endif %}
+
+{% if page_obj.has_other_pages %}
+  <nav class="mt-8 flex justify-center space-x-2" role="navigation" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}"
+         class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+         aria-label="Previous page">← Prev</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+        {% if num == page_obj.number %}
+          <span aria-current="page" class="px-3 py-1 rounded bg-blue-600 text-white font-semibold">{{ num }}</span>
+        {% else %}
+          <a href="?page={{ num }}"
+             class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+             aria-label="Page {{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}"
+         class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+         aria-label="Next page">Next →</a>
+    {% endif %}
+  </nav>
+{% endif %}
+<script>
+  function toggleCourseDetails(courseId) {
+    const detailEl = document.getElementById(`course-${courseId}-details`);
+    if (detailEl) {
+      detailEl.classList.toggle('hidden');
+    }
+  }
+</script>

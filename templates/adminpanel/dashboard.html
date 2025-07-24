@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block content %}
+<div class="w-full min-h-[80vh] flex flex-col justify-center items-center py-10">
+  <h2 class="text-3xl font-semibold mb-8 flex items-center gap-3">
+    🛠 Admin Dashboard
+  </h2>
+<a href="{% url 'test_verification' %}" class="bg-blue-500 text-white py-2 px-4 rounded" style="margin-top: 20px;">Send Test Email</a>
+  <div class="w-full px-4 lg:px-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 justify-items-center">
+      
+      <a href="{% url 'report_list' %}" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:brightness-110 transition p-12 rounded-3xl flex flex-col items-center shadow-xl w-72 h-72 justify-center">
+        <div class="mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 -960 960 960"><path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564m0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27m0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454M260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6m260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59M280-494"/></svg>
+        </div>
+        <span class="font-medium text-2xl text-white text-center">View Reports</span>
+      </a>
+
+      <a href="{% url 'moderation_log' %}" class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:brightness-110 transition p-12 rounded-3xl flex flex-col items-center shadow-xl w-72 h-72 justify-center">
+        <div class="mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 -960 960 960"><path d="M240-360h280l80-80H240zm0-160h240v-80H240zm-80-160v400h280l-80 80H80v-560h800v120h-80v-40zm756 212q5 5 5 11t-5 11l-36 36-70-70 36-36q5-5 11-5t11 5zM520-120v-70l266-266 70 70-266 266zM160-680v400z"/></svg>
+        </div>
+        <span class="font-medium text-2xl text-white text-center">Moderation Logs</span>
+      </a>
+
+      <a href="{% url 'admin_users' %}" class="bg-gradient-to-r from-green-600 to-emerald-500 hover:brightness-110 transition p-12 rounded-3xl flex flex-col items-center shadow-xl w-72 h-72 justify-center">
+        <div class="mb-5">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 19.1276C15.8329 19.37 16.7138 19.5 17.625 19.5C19.1037 19.5 20.5025 19.1576 21.7464 18.5478C21.7488 18.4905 21.75 18.4329 21.75 18.375C21.75 16.0968 19.9031 14.25 17.625 14.25C16.2069 14.25 14.956 14.9655 14.2136 16.0552M15 19.1276V19.125C15 18.0121 14.7148 16.9658 14.2136 16.0552M15 19.1276C15 19.1632 14.9997 19.1988 14.9991 19.2343C13.1374 20.3552 10.9565 21 8.625 21C6.29353 21 4.11264 20.3552 2.25092 19.2343C2.25031 19.198 2.25 19.1615 2.25 19.125C2.25 15.6042 5.10418 12.75 8.625 12.75C11.0329 12.75 13.129 14.085 14.2136 16.0552M12 6.375C12 8.23896 10.489 9.75 8.625 9.75C6.76104 9.75 5.25 8.23896 5.25 6.375C5.25 4.51104 6.76104 3 8.625 3C10.489 3 12 4.51104 12 6.375ZM20.25 8.625C20.25 10.0747 19.0747 11.25 17.625 11.25C16.1753 11.25 15 10.0747 15 8.625C15 7.17525 16.1753 6 17.625 6C19.0747 6 20.25 7.17525 20.25 8.625Z" stroke="#0F172A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-medium text-2xl text-white text-center">Manage Users</span>
+      </a>
+
+      <a href="{% url 'admin_approvals' %}" class="bg-gradient-to-r from-yellow-500 to-amber-400 hover:brightness-110 transition p-12 rounded-3xl flex flex-col items-center shadow-xl w-72 h-72 justify-center">
+        <div class="mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 -960 960 960"><path d="m691-150 139-138-42-42-97 95-39-39-42 43zM240-600h480v-80H240zM720-40q-83 0-141.5-58.5T520-240t58.5-141.5T720-440t141.5 58.5T920-240 861.5-98.5 720-40M120-80v-680q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v267q-19-9-39-15t-41-9v-243H200v562h243q5 31 15.5 59T486-86l-6 6-60-60-60 60-60-60-60 60-60-60zm120-200h203q3-21 9-41t15-39H240zm0-160h284q38-37 88.5-58.5T720-520H240zm-40 242v-562z"/></svg>
+        </div>
+        <span class="font-medium text-2xl text-white text-center">Course Approvals</span>
+      </a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

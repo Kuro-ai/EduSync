@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-16 bg-white shadow-lg rounded-2xl p-8 text-center">
+  <h2 class="text-3xl font-bold text-gray-800 mb-4">📩 Email Verification Sent</h2>
+  
+  <p class="text-gray-600 mb-4">
+    We've sent a verification email to your inbox. Please open it and click the link to verify your account.
+  </p>
+
+  <p class="text-gray-600">
+    Didn’t receive it? Check your spam folder or 
+    <a href="{% url 'resend_verification_email' %}" class="text-blue-600 hover:underline font-medium">
+      resend the email
+    </a>.
+  </p>
+</div>
+{% endblock %}

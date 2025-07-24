@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">🔔 Notifications</h1>
+
+    {% if notifications %}
+
+        <form method="post" action="{% url 'mark_all_notifications_read' %}" class="text-right mb-4">
+            {% csrf_token %}
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                ✅ Mark All as Read
+            </button>
+        </form>
+
+        <ul class="space-y-4">
+            {% for notification in notifications %}
+                <li class="p-4 rounded-2xl shadow-sm border transition duration-200 
+                           {{ notification.is_read|yesno:'bg-gray-100 hover:bg-gray-200,bg-white hover:bg-gray-50' }}">
+                    <div class="flex justify-between items-start">
+                        <p class="text-gray-800 font-medium p-3">{{ notification.message }}</p>
+                        <span class="text-sm text-gray-500 p-3 whitespace-nowrap">
+                            {{ notification.created_at|date:"M d, Y H:i" }}
+                        </span>
+                    </div>
+                    {% if not notification.is_read %}
+                        <form method="post" action="{% url 'mark_notification_read' notification.id %}">
+                            {% csrf_token %}
+                            <button class="mt-2 p-3 inline-block text-blue-600 hover:text-blue-800 text-sm font-semibold transition">
+                                Mark as read
+                            </button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if has_more %}
+            <div class="text-center mt-6">
+                <a href="?limit={{ next_limit }}"
+                   class="inline-block px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+                    Load More
+                </a>
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="text-gray-500 text-center">📭 You have no notifications.</p>
+    {% endif %}
+</div>
+{% endblock %}

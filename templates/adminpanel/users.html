@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-white rounded-xl shadow-md max-w-5xl mx-auto space-y-6">
+  <h2 class="text-2xl font-semibold">👥 Manage Users</h2>
+
+  <!-- Filters -->
+  <form method="get" id="filter-form" class="flex flex-wrap items-center gap-4 bg-gray-50 p-4 rounded shadow">
+    <input
+      type="text"
+      name="email"
+      value="{{ email_query }}"
+      placeholder="Search by email"
+      class="border rounded px-3 py-2 w-48"
+      id="email-input"
+    />
+
+    <div class="flex items-center border rounded px-3 py-2 bg-white w-48">
+      <input
+        type="text"
+        name="username"
+        value="{{ username_query }}"
+        placeholder="Username"
+        class="outline-none w-full bg-transparent"
+        id="username-input"
+      />
+    </div>
+
+    <select
+      name="timeout_status"
+      class="border rounded px-3 py-2 w-40"
+      id="timeout-select"
+    >
+      <option value="">All Status</option>
+      <option value="timed_out" {% if timeout_status == 'timed_out' %}selected{% endif %}>Timed Out</option>
+      <option value="active" {% if timeout_status == 'active' %}selected{% endif %}>Active</option>
+    </select>
+
+    <a
+      href="{% url 'admin_users' %}"
+      class="bg-gray-200 text-gray-800 rounded px-3 py-2 hover:bg-gray-300"
+    >
+      Clear
+    </a>
+  </form>
+
+  <div id="user-list">
+    {% include "adminpanel/partials/user_list.html" %}
+  </div>
+</div>
+
+<script>
+  function debounce(callback, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => callback.apply(this, args), delay);
+    };
+  }
+
+  const emailInput = document.getElementById('email-input');
+  const usernameInput = document.getElementById('username-input');
+  const timeoutSelect = document.getElementById('timeout-select');
+
+  function fetchFilteredUsers(page = 1) {
+    const params = new URLSearchParams();
+    if (emailInput.value) params.append("email", emailInput.value);
+    if (usernameInput.value) params.append("username", usernameInput.value);
+    if (timeoutSelect.value) params.append("timeout_status", timeoutSelect.value);
+    if (page > 1) params.append("page", page);
+
+    fetch(`?${params.toString()}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("user-list").outerHTML = data.html;
+      bindPaginationLinks();
+    });
+  }
+
+  function bindPaginationLinks() {
+    document.querySelectorAll('#user-list .pagination a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const page = new URL(link.href).searchParams.get('page') || 1;
+        fetchFilteredUsers(page);
+      });
+    });
+  }
+
+  const debouncedFetch = debounce(() => fetchFilteredUsers(1), 300);
+  emailInput.addEventListener('input', debouncedFetch);
+  usernameInput.addEventListener('input', debouncedFetch);
+  timeoutSelect.addEventListener('change', () => fetchFilteredUsers(1));
+
+  bindPaginationLinks();
+</script>
+{% endblock %}

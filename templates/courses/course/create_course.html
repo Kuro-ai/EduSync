@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-8">
+    <h2 class="text-3xl font-semibold mb-6 text-gray-800">Create a New Course</h2>
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div class="flex justify-start gap-4 mt-2">
+        <button type="submit" 
+                class="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 transition">
+          Create
+        </button>
+        <a href="{% url 'dashboard' %}" 
+           class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

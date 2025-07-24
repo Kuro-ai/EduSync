@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-6 bg-white rounded-xl shadow-md">
+  <h1 class="text-2xl font-semibold mb-4">Moderation Logs</h1>
+
+  <div class="mb-4 flex flex-wrap gap-4">
+    <input id="log-query" type="text" placeholder="Search admin or target" class="border rounded p-2 w-64" />
+    <input id="log-date" type="date" class="border rounded p-2" />
+    <select id="log-action" class="border rounded p-2">
+      <option value="">All Actions</option>
+      {% for val, label in actions %}
+      <option value="{{ val }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select id="log-target-type" class="border rounded p-2">
+      <option value="">All Target Types</option>
+      <option value="CustomUser">User</option>
+      <option value="Course">Course</option>
+    </select>
+    <button id="clear-filters" class="bg-gray-200 px-3 py-2 rounded">Clear</button>
+  </div>
+
+  <div id="moderation-log-table">
+    {% include 'adminpanel/partials/moderation_logs_table.html' %}
+  </div>
+</div>
+
+<script>
+function debounce(callback, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => callback.apply(this, args), delay);
+  };
+}
+
+const queryInput = document.getElementById('log-query');
+const dateInput = document.getElementById('log-date');
+const actionSelect = document.getElementById('log-action');
+const targetTypeSelect = document.getElementById('log-target-type');
+const logTableDiv = document.getElementById('moderation-log-table');
+
+function fetchLogs(page = 1) {
+  const params = new URLSearchParams();
+  if (queryInput.value) params.append('query', queryInput.value);
+  if (dateInput.value) params.append('date', dateInput.value);
+  if (actionSelect.value) params.append('action', actionSelect.value);
+  if (targetTypeSelect.value) params.append('target_type', targetTypeSelect.value);
+  if (page > 1) params.append('page', page);
+
+  fetch(`?${params.toString()}`, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    logTableDiv.innerHTML = data.html;
+    bindPaginationLinks();
+  });
+}
+
+const debouncedFetch = debounce(() => fetchLogs(1), 300);
+[queryInput, dateInput, actionSelect, targetTypeSelect].forEach(el => {
+  el.addEventListener('input', debouncedFetch);
+  el.addEventListener('change', debouncedFetch);
+});
+
+document.getElementById('clear-filters').addEventListener('click', () => {
+  queryInput.value = '';
+  dateInput.value = '';
+  actionSelect.value = '';
+  targetTypeSelect.value = '';
+  fetchLogs(1);
+});
+
+function bindPaginationLinks() {
+  document.querySelectorAll('#moderation-log-table a[href*="page="]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const url = new URL(link.href, window.location.origin);
+      const page = url.searchParams.get('page') || 1;
+      fetchLogs(page);
+    });
+  });
+}
+
+bindPaginationLinks();
+</script>
+
+{% endblock %}

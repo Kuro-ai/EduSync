@@ -1,0 +1,102 @@
+<ul id="user-list" class="space-y-6">
+  {% for user in users %}
+    {% if user != request.user %}
+    <li class="bg-white p-4 rounded shadow-sm border border-gray-200">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="space-y-1 text-gray-800 text-sm">
+          <p><strong>Email:</strong> {{ user.email }}{% if user.is_superuser %} <span class="text-yellow-500 font-semibold">(Superuser)</span>{% endif %}</p>
+          <p><strong>Username:</strong> {{ user.full_name }}</p>
+          <p><strong>Joined:</strong> {{ user.date_joined|date:"Y-m-d" }}</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 mt-3 sm:mt-0">
+          {% if not user.is_superuser %}
+            <form method="post" action="{% url 'admin_toggle_timeout' user.id %}" class="flex flex-col sm:flex-row sm:items-center gap-2" onsubmit="return confirmSuspend(this)">
+              {% csrf_token %}
+              {% if user.timeout_until and user.timeout_until > now %}
+                <p class="text-red-600 font-semibold whitespace-nowrap">⏱ Timed out until: {{ user.timeout_until|date:"Y-m-d H:i" }}</p>
+                <button type="submit" name="action" value="unsuspend" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition">
+                  Unsuspend
+                </button>
+              {% else %}
+                <label for="timeout-{{ user.id }}" class="sr-only">Timeout (hours)</label>
+                <input
+                  id="timeout-{{ user.id }}"
+                  type="number"
+                  name="hours"
+                  min="1" max="8760"
+                  placeholder="Hours"
+                  class="border border-gray-300 rounded px-2 py-1 w-20 text-sm"
+                  required
+                >
+                <button type="submit" name="action" value="suspend" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">
+                  Suspend
+                </button>
+              {% endif %}
+            </form>
+
+            {% if request.user.is_superuser %}
+              <form method="post" action="{% url 'toggle_staff_status' user.id %}" class="mt-2 sm:mt-0" onsubmit="return confirmPromoteDemote(this, '{{ user.is_staff }}')">
+                {% csrf_token %}
+                {% if user.is_staff %}
+                  <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition">
+                    Demote from Admin
+                  </button>
+                {% else %}
+                  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">
+                    Promote to Admin
+                  </button>
+                {% endif %}
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </li>
+    {% endif %}
+  {% empty %}
+    <li class="text-center text-gray-500 py-6">No users found.</li>
+  {% endfor %}
+</ul>
+
+{% if page_obj.has_other_pages %}
+  <nav aria-label="Pagination" class="mt-6 flex justify-center flex-wrap gap-2">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300" aria-label="Previous page">← Prev</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+        {% if num == page_obj.number %}
+          <span class="px-3 py-1 bg-blue-600 text-white rounded" aria-current="page">{{ num }}</span>
+        {% else %}
+          <a href="?page={{ num }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">{{ num }}</a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300" aria-label="Next page">Next →</a>
+    {% endif %}
+  </nav>
+{% endif %}
+
+<script>
+  function confirmSuspend(form) {
+    const action = form.querySelector('button[name="action"]').value;
+    if (action === 'suspend') {
+      const hours = form.querySelector('input[name="hours"]').value;
+      return confirm(`Are you sure you want to suspend this user for ${hours} hour(s)?`);
+    } else {
+      return confirm("Are you sure you want to unsuspend this user?");
+    }
+  }
+
+  function confirmPromoteDemote(form, isStaff) {
+    if (isStaff === 'True') {
+      return confirm("Are you sure you want to demote this admin?");
+    } else {
+      return confirm("Are you sure you want to promote this user to admin?");
+    }
+  }
+</script>

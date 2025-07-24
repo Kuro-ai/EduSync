@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Your Score: {{ score }}/10</h2>
+
+    <!-- Mobile-friendly stacked layout -->
+    <div class="space-y-4 md:hidden">
+        {% for result in results %}
+        <div class="border border-gray-200 rounded-lg p-4 shadow-sm bg-gray-50">
+            <p class="text-sm"><span class="font-semibold text-gray-700">Question:</span> {{ result.question }}</p>
+            <p class="text-sm"><span class="font-semibold text-gray-700">Your Answer:</span> {{ result.user_answer }}</p>
+            <p class="text-sm"><span class="font-semibold text-gray-700">Correct Answer:</span> {{ result.correct_answer }}</p>
+            <p class="text-sm"><span class="font-semibold text-gray-700">Explanation:</span> {{ result.explanation }}</p>
+            <p class="text-sm">
+                <span class="font-semibold text-gray-700">Status:</span>
+                {% if result.is_correct %}
+                    <span class="text-green-600 font-semibold">✅ Correct</span>
+                {% else %}
+                    <span class="text-red-600 font-semibold">❌ Incorrect</span>
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop table layout -->
+    <div class="hidden md:block overflow-x-auto">
+        <table class="w-full border-collapse table-auto border border-gray-300 text-sm">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Question</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Your Answer</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Correct Answer</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Explanation</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
+                    <td class="border border-gray-300 px-4 py-2">{{ result.question }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ result.user_answer }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ result.correct_answer }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ result.explanation }}</td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        {% if result.is_correct %}
+                            <span class="text-green-600 font-semibold">✅ Correct</span>
+                        {% else %}
+                            <span class="text-red-600 font-semibold">❌ Incorrect</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6">
+        <a href="{% url 'course_detail' lesson.module.course.id %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow">
+            🔙 Back to Course Details
+        </a>
+    </div>
+</div>
+{% endblock %}

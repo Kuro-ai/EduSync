@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: django-web
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: SECRET_KEY
+        value: YOUR_SECRET_KEY
+      - key: DEBUG
+        value: False
+      - key: VT_API_KEY
+        value: YOUR_VIRUSTOTAL_API_KEY
+      - key: EMAIL_HOST_USER
+        value: YOUR_EMAIL
+      - key: EMAIL_HOST_PASSWORD
+        value: YOUR_EMAIL_APP_PASSWORD
+      - key: POSTGRES_DB
+        value: YOUR_DB
+      - key: POSTGRES_USER
+        value: YOUR_DB_USER
+      - key: POSTGRES_PASSWORD
+        value: YOUR_DB_PASSWORD
+      - key: POSTGRES_HOST
+        value: YOUR_DB_HOST
+      - key: POSTGRES_PORT
+        value: 5432

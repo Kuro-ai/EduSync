@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-6 bg-white rounded-xl shadow-md max-w-5xl mx-auto space-y-6">
+  <h3 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+    📝 Manage Contents
+  </h3>
+
+  <form id="filterForm" method="get" class="mb-8 grid grid-cols-1 sm:grid-cols-4 gap-6 items-end">
+    <div>
+      <label for="search" class="block font-medium mb-1 text-gray-700">Search Title</label>
+      <input
+        type="text"
+        name="search"
+        id="search"
+        value="{{ search_query }}"
+        placeholder="Course title..."
+        class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+        autocomplete="off"
+      >
+    </div>
+
+    <div>
+      <label for="status" class="block font-medium mb-1 text-gray-700">Status</label>
+      <select
+        name="status"
+        id="status"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+      >
+        <option value="" {% if not status_filter %}selected{% endif %}>All</option>
+        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+        <option value="not_approved" {% if status_filter == 'not_approved' %}selected{% endif %}>Revoked</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="date" class="block font-medium mb-1 text-gray-700">Created Date</label>
+      <input
+        type="date"
+        id="date"
+        name="date"
+        value="{{ date_filter }}"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+      >
+    </div>
+
+    <div class="flex space-x-3">
+      <button type="submit" class="hidden">Search</button> 
+
+      <a href="{% url 'admin_approvals' %}"
+         class="inline-block bg-gray-200 text-gray-800 px-5 py-2 rounded-md shadow hover:bg-gray-300 transition font-medium"
+      >
+        Clear
+      </a>
+    </div>
+  </form>
+
+  <div id="courseList">
+    {% include 'adminpanel/partials/course_list.html' %}
+  </div>
+</div>
+
+<script>
+  const filterForm = document.getElementById('filterForm');
+  const searchInput = document.getElementById('search');
+  const statusSelect = document.getElementById('status');
+  const dateInput = document.getElementById('date');
+  const courseListDiv = document.getElementById('courseList');
+
+  function debounce(func, delay) {
+    let timer;
+    return function(...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => func.apply(this, args), delay);
+    }
+  }
+
+  async function submitFormAjax() {
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams(formData);
+    const cursorPos = searchInput.selectionStart;
+
+    try {
+      const response = await fetch(`${filterForm.action || window.location.pathname}?${params.toString()}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const html = await response.text();
+
+      courseListDiv.innerHTML = html;
+
+      searchInput.focus();
+      searchInput.setSelectionRange(cursorPos, cursorPos);
+    } catch (err) {
+      console.error('AJAX form submission error:', err);
+    }
+  }
+
+  statusSelect.addEventListener('change', submitFormAjax);
+  dateInput.addEventListener('change', submitFormAjax);
+  searchInput.addEventListener('input', debounce(submitFormAjax, 500));
+
+  courseListDiv.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && e.target.getAttribute('href')?.includes('page=')) {
+      e.preventDefault();
+      const url = new URL(e.target.href);
+      const params = new URLSearchParams(new FormData(filterForm));
+      params.set("page", url.searchParams.get("page"));
+
+      fetch(`${filterForm.action || window.location.pathname}?${params.toString()}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(res => res.text())
+        .then(html => {
+          courseListDiv.innerHTML = html;
+        })
+        .catch(err => console.error('AJAX pagination error:', err));
+    }
+  });
+</script>
+{% endblock %}
