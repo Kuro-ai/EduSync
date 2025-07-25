@@ -15,6 +15,7 @@ from datetime import datetime
 from adminpanel.utils import log_moderation_action
 from django.core.paginator import Paginator
 import pdfkit
+import shutil
 
 @login_required
 def create_course(request):
@@ -500,7 +501,6 @@ def mark_lesson_complete(request, lesson_id):
     return redirect('course_detail', course_id=course.id)
 
 def generate_certificate(request, course_id):
-
     course = get_object_or_404(Course, pk=course_id)
     context = {
         'course': course,
@@ -508,10 +508,17 @@ def generate_certificate(request, course_id):
     }
 
     html_string = render_to_string('courses/certificate.html', context)
-    path_to_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+    path_to_wkhtmltopdf = shutil.which('wkhtmltopdf')
+    if not path_to_wkhtmltopdf:
+        return HttpResponse("wkhtmltopdf not found on server", status=500)
+
     config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
 
-    pdf = pdfkit.from_string(html_string, False, configuration=config)
+    try:
+        pdf = pdfkit.from_string(html_string, False, configuration=config)
+    except Exception as e:
+        return HttpResponse(f"PDF generation failed: {e}", status=500)
 
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="certificate.pdf"'
