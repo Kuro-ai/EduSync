@@ -6,7 +6,7 @@ class RequestCounterMiddleware:
 
     def __call__(self, request):
         now = int(time.time())  # current UNIX timestamp (seconds)
-        key = f'req_count: {now}'
+        key = f'req_count_{now}'
         current = cache.get(key, 0)
         cache.set(key, current + 1, timeout=120)  # store count for 2 mins
         return self.get_response(request)
