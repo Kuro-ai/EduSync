@@ -13,6 +13,6 @@ urlpatterns = [
     path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
     path('faq/', views.faq, name='faq'),
     path('test-verification/', views.send_test_verification_email, name='test_verification'),
-     path('profile/', views.profile_view, name='profile'),
+    path('profile/', views.profile_view, name='profile'),
     path('', lambda request: redirect('dashboard/')),
 ]
