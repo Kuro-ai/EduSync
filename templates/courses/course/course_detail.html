@@ -163,7 +163,7 @@
                             <strong class="break-words break-all whitespace-pre-wrap overflow-wrap">Quiz:</strong> {{ quiz.title }}<br>
                             📝 Questions: {{ quiz.questions.count }}
                             <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 mt-2">
-                              <div class="flex flex-wrap gap-2 mt-2">
+                              <div class="flex flex-wrap gap-2">
                                 {% if course.instructor == user or user.is_admin %}
                                   <a href="{% url 'view_quiz' quiz.id %}" class="min-w-[100px] text-center px-3 py-1 text-sm rounded transition font-semibold whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600">👁️ View</a>
                                 {% endif %}

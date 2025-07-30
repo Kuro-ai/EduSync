@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>EduSync</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -30,7 +30,7 @@
           <div class="relative flex items-center space-x-3">
             <button id="dropdownToggle" class="relative flex items-center space-x-2 focus:outline-none text-white">
               {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white object-cover">
+                <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white object-cover" />
               {% else %}
                 <div class="w-8 h-8 bg-yellow-400 text-indigo-900 rounded-full flex items-center justify-center font-semibold">
                   {{ user.full_name|default:user.email|slice:":1"|upper }}
@@ -59,7 +59,7 @@
                 {% endif %}
               </a>
               <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">Logout</a>
+              <a id="logout-link" href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">Logout</a>
             </div>
           </div>
         {% else %}
@@ -108,13 +108,48 @@
 
 <footer class="bg-indigo-600 border-t border-indigo-500 py-4 text-center text-sm text-white">
   &copy; {% now "Y" %} EduSync. All rights reserved.
-  <br>
+  <br />
   <a href="{% url 'privacy_policy' %}" class="hover:text-indigo-200 underline">Privacy Policy</a> |
   <a href="{% url 'terms_of_service' %}" class="hover:text-indigo-200 underline">Terms of Service</a> |
   <a href="{% url 'faq' %}" class="hover:text-indigo-200 underline">FAQs</a>
 </footer>
 
+<div id="chatbot-container" class="fixed bottom-20 right-5 z-50">
+  <button id="chatbot-toggle"
+    class="bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+    💬
+  </button>
+
+
+  <div id="chatbot-window" class="hidden mt-2 w-80 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+ 
+  <div class="bg-indigo-600 text-white px-4 py-2 text-sm font-semibold flex justify-between items-center">
+    <span>EduSync Chatbot</span>
+    <button id="chatbot-close" class="text-white hover:text-red-400 text-lg font-bold focus:outline-none">&times;</button>
+  </div>
+
+  <div id="chatbot-messages" class="h-64 overflow-y-auto px-4 py-3 text-sm space-y-3 bg-gray-50">
+
+  </div>
+
+  <div class="flex items-center gap-2 px-3 py-2 border-t bg-white">
+    <input
+      id="chatbot-input"
+      type="text"
+      placeholder="Type a message..."
+      class="flex-grow text-sm px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+    />
+    <button
+      id="chatbot-send"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm rounded-md shadow-sm transition"
+    >
+      Send
+    </button>
+  </div>
+</div>
+
 <script>
+ 
   const toggleBtn = document.getElementById("mobile-menu-toggle");
   const mobileMenu = document.getElementById("mobile-menu");
   toggleBtn.addEventListener("click", () => {
@@ -134,6 +169,154 @@
       dropdownMenu.classList.add('invisible');
     }
   });
+
+  const chatbotToggle = document.getElementById("chatbot-toggle");
+  const chatbotWindow = document.getElementById("chatbot-window");
+  const chatbotSend = document.getElementById("chatbot-send");
+  const chatbotInput = document.getElementById("chatbot-input");
+  const chatbotMessages = document.getElementById("chatbot-messages");
+
+  function loadChatHistory() {
+    const history = JSON.parse(localStorage.getItem("chatbotHistory") || "[]");
+    chatbotMessages.innerHTML = "";
+    history.forEach(({ text, isUser }) => {
+      const msg = document.createElement("div");
+      msg.className = isUser ? "text-right text-indigo-700" : "text-left text-gray-700";
+      msg.innerText = text;
+      chatbotMessages.appendChild(msg);
+    });
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+  }
+
+  function addMessage(text, isUser) {
+    const msgWrapper = document.createElement("div");
+    msgWrapper.className = isUser ? "flex justify-end" : "flex justify-start";
+
+    const msgBubble = document.createElement("div");
+    msgBubble.className = `
+      max-w-[80%] px-4 py-2 rounded-lg shadow
+      ${isUser
+        ? "bg-indigo-100 text-indigo-800 self-end text-right"
+        : "bg-white text-gray-800 border border-gray-200 self-start text-left"}
+    `;
+
+    const label = document.createElement("div");
+    label.className = "text-xs font-semibold mb-1";
+    label.textContent = isUser ? "You" : "Bot";
+
+    const msgText = document.createElement("div");
+    msgText.textContent = text;
+    msgText.className = "whitespace-pre-wrap break-words";
+
+    msgBubble.appendChild(label);
+    msgBubble.appendChild(msgText);
+    msgWrapper.appendChild(msgBubble);
+    chatbotMessages.appendChild(msgWrapper);
+
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+    const history = JSON.parse(localStorage.getItem("chatbotHistory") || "[]");
+    history.push({ text, isUser });
+    localStorage.setItem("chatbotHistory", JSON.stringify(history));
+  }
+
+
+  function sendMessage() {
+    const message = chatbotInput.value.trim();
+    if (!message) return;
+    addMessage(message, true);
+    chatbotInput.value = "";
+
+    fetch("/chatbot/get-response/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({ message })
+    })
+    .then(response => response.json())
+    .then(data => {
+      addMessage(data.response, false);
+    });
+  }
+
+  function getCSRFToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie.split("; ");
+    for (const cookie of cookies) {
+      if (cookie.startsWith(name + "=")) {
+        return decodeURIComponent(cookie.split("=")[1]);
+      }
+    }
+    return "";
+  }
+
+  chatbotToggle.addEventListener("click", () => {
+    chatbotWindow.classList.remove("hidden");
+    chatbotToggle.classList.add("hidden");  
+    localStorage.setItem('chatbotWindowOpen', true);
+  });
+
+
+  const chatbotClose = document.getElementById("chatbot-close");
+  if (chatbotClose) {
+    chatbotClose.addEventListener("click", () => {
+      chatbotWindow.classList.add("hidden");
+      chatbotToggle.classList.remove("hidden");  
+      localStorage.setItem('chatbotWindowOpen', false);
+    });
+  }
+
+  window.addEventListener('load', () => {
+    loadChatHistory();
+
+    const isOpen = localStorage.getItem('chatbotWindowOpen') === 'true';
+    if (isOpen) {
+      chatbotWindow.classList.remove('hidden');
+      chatbotToggle.classList.add('hidden');  
+    } else {
+      chatbotWindow.classList.add('hidden');
+      chatbotToggle.classList.remove('hidden');  
+    }
+  });
+
+  chatbotSend.addEventListener("click", sendMessage);
+  chatbotInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") sendMessage();
+  });
+
+  const logoutLink = document.getElementById('logout-link');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', () => {
+      localStorage.removeItem('chatbotHistory');
+      localStorage.removeItem('chatbotWindowOpen');
+    });
+  }
+
+  let inactivityTime = function () {
+    let timer;
+
+    function clearHistoryAndLogout() {
+      localStorage.removeItem('chatbotHistory');
+      localStorage.removeItem('chatbotWindowOpen');
+      alert("You have been inactive for 15 minutes. Logging out for security reasons.");
+      window.location.href = "{% url 'logout' %}";
+    }
+
+    function resetTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(clearHistoryAndLogout, 15 * 60 * 1000);
+    }
+
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.ontouchstart = resetTimer;
+    document.onclick = resetTimer;
+  };
+
+  inactivityTime();
 </script>
 
 </body>

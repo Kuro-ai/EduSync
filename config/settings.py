@@ -30,7 +30,7 @@ VT_API_KEY = os.environ.get('VT_API_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-# DEBUG = True
+DEBUG = False
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME] if RENDER_EXTERNAL_HOSTNAME else []
 # ALLOWED_HOSTS =[]
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'courses',
     'adminpanel',
     'notifications',
+    'chatbot',
     'crispy_forms',
     'widget_tweaks',
     'markdownx',
@@ -166,17 +167,14 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Security
-SECURE_SSL_REDIRECT = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-
-SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-
-SECURE_REFERRER_POLICY = 'same-origin'
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REFERRER_POLICY = 'same-origin'

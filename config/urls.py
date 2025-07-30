@@ -26,5 +26,6 @@ urlpatterns = [
     path('markdownx/', include('markdownx.urls')),
     path('adminpanel/', include('adminpanel.urls')),
     path('notifications/', include('notifications.urls')),
+    path("chatbot/", include("chatbot.urls")),
 ]
 
