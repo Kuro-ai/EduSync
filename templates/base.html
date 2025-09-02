@@ -269,11 +269,18 @@
   }
 
   chatbotToggle.addEventListener("click", () => {
-    chatbotWindow.classList.remove("hidden");
-    chatbotToggle.classList.add("hidden");  
-    localStorage.setItem('chatbotWindowOpen', true);
-  });
+  chatbotWindow.classList.remove("hidden");
+  chatbotToggle.classList.add("hidden");
+  localStorage.setItem('chatbotWindowOpen', true);
 
+  if (!localStorage.getItem("chatbotHistory")) {
+      fetch("/chatbot/get-response/", { method: "GET" })
+        .then(res => res.json())
+        .then(data => {
+          addMessage(data.response, false);
+        });
+    }
+  });
 
   const chatbotClose = document.getElementById("chatbot-close");
   if (chatbotClose) {
