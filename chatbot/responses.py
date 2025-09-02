@@ -12,7 +12,7 @@ HELP_OVERVIEW = (
     "• What happens if my verification link expires?\n"
     "• How do I earn a certificate?\n"
     "• Where can I find the Privacy Policy?\n\n"
-    "If you're not sure where to start, try typing **help** to see what I can do!"
+    "If you're not sure where to start, try typing 'help' to see what I can do!"
 )
 
 RESPONSES = {
@@ -24,24 +24,24 @@ RESPONSES = {
     # Help overview
     "help": (
         "I can guide you with things like:\n\n"
-        "📌 **Account** → login, signup, verification, reset password\n"
-        "📌 **Courses** → create course, add modules/lessons/quizzes\n"
-        "📌 **Learning** → take quizzes, earn certificates\n"
-        "📌 **Info** → privacy, terms, support\n\n"
+        "📌 'Account' → login, signup, verification, reset password\n"
+        "📌 'Courses' → create course, add modules/lessons/quizzes\n"
+        "📌 'Learning' → take quizzes, earn certificates\n"
+        "📌 'Info' → privacy, terms, support\n\n"
         "👉 Example questions:\n"
-        "- *How do I create a course?*\n"
-        "- *Where can I find my certificate?*\n"
-        "- *What happens if my verification link expires?*\n\n"
+        "- How do I create a course?\n"
+        "- Where can I find my certificate?\n"
+        "- What happens if my verification link expires?\n\n"
         "Just type what you're curious about, and I’ll help!"
     ),
 
     # Login & signup
     "login": (
-        "To log in, click the **Login** button at the top right and enter your email + password. "
+        "To log in, click the 'Login' button at the top right and enter your email + password. "
         "If you don’t have an account yet, sign up first. 👍"
     ),
     "signup": (
-        "To sign up, click **Login** (top right), then choose *Create an account*. "
+        "To sign up, click 'Login' (top right), then choose 'Create an account'. "
         "You'll get a verification email to confirm your account."
     ),
     "email verification": (
@@ -51,29 +51,29 @@ RESPONSES = {
     "login failed": (
         "😕 Having trouble logging in? Double-check your email and password. "
         "If your account isn’t verified, logging in will resend the verification email. "
-        "Still stuck? Contact support at **kmh61030@gmail.com**."
+        "Still stuck? Contact support at 'kmh61030@gmail.com'."
     ),
     "reset password": (
-        "Forgot your password? No worries! Email **kmh61030@gmail.com**, "
+        "Forgot your password? No worries! Email 'kmh61030@gmail.com', "
         "and our admin will help you reset it."
     ),
 
     # Courses
     "create course": (
-        "To create a course, head to your **Dashboard** and click *Create New Course*. 🚀"
+        "To create a course, head to your 'Dashboard' and click 'Create New Course'. 🚀"
     ),
     "add module": (
-        "Modules organize your course. From your dashboard, select a course and click *Add Module*."
+        "Modules organize your course. From your dashboard, select a course and click 'Add Module'."
     ),
     "add lesson": (
-        "Lessons go inside modules. Open your course → pick a module → click *Add Lesson*."
+        "Lessons go inside modules. Open your course → pick a module → click 'Add Lesson'."
     ),
     "add quiz": (
-        "To add a quiz, open your course → go to the module/lesson → click *Add Quiz*."
+        "To add a quiz, open your course → go to the module/lesson → click 'Add Quiz'."
     ),
     "add question": (
         "When you create a quiz, you'll be prompted to add questions. "
-        "To add more later, go to *View Quiz* → *Add Question*."
+        "To add more later, go to 'View Quiz' → 'Add Question'."
     ),
 
     # Certificates
@@ -83,11 +83,11 @@ RESPONSES = {
     ),
 
     # Info & support
-    "privacy": "🔒 We value your privacy. Check the **Privacy Policy** link in the footer.",
-    "terms": "📜 You can review our **Terms of Service** anytime from the footer.",
-    "support": "💌 Need help? Email us at **kmh61030@gmail.com**, and we’ll assist you.",
+    "privacy": "🔒 We value your privacy. Check the 'Privacy Policy' link in the footer.",
+    "terms": "📜 You can review our 'Terms of Service' anytime from the footer.",
+    "support": "💌 Need help? Email us at 'kmh61030@gmail.com', and we’ll assist you.",
 }
 
 DEFAULT_RESPONSE = (
-    "🤔 Sorry, I’m not sure about that. Try typing **help** to see what I can do!"
+    "🤔 Sorry, I’m not sure about that. Try typing 'help' to see what I can do!"
 )
