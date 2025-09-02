@@ -154,5 +154,5 @@ RESPONSES = {
 }
 
 DEFAULT_RESPONSE = (
-    "I'm sorry, I didn't understand that. Try asking about 'course', 'certificate', 'help', or 'privacy'."
+    "I'm sorry, I didn't understand that. Try typing 'help' for available commands."
 )
