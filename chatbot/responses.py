@@ -7,11 +7,6 @@ HELP_OVERVIEW = (
     "- Browsing and enrolling in courses\n"
     "- Privacy, data, and terms of service\n"
     "- Contacting support\n\n"
-    "Try asking things like:\n"
-    "• How do I create a course?\n"
-    "• What happens if my verification link expires?\n"
-    "• How do I earn a certificate?\n"
-    "• Where can I find the Privacy Policy?\n\n"
     "If you're not sure where to start, try typing 'help' to see what I can do!"
 )
 
@@ -28,10 +23,6 @@ RESPONSES = {
         "📌 'Courses' → create course, add modules/lessons/quizzes\n"
         "📌 'Learning' → take quizzes, earn certificates\n"
         "📌 'Info' → privacy, terms, support\n\n"
-        "👉 Example questions:\n"
-        "- How do I create a course?\n"
-        "- Where can I find my certificate?\n"
-        "- What happens if my verification link expires?\n\n"
         "Just type what you're curious about, and I’ll help!"
     ),
 

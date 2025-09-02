@@ -308,9 +308,23 @@
 
   window.addEventListener("load", () => {
     loadChatHistory();
+
     const isOpen = localStorage.getItem("chatbotWindowOpen") === "true";
-    if (isOpen) openChatbot();
-    else closeChatbot();
+    const helperShown = sessionStorage.getItem("chatbotHelperShown") === "true";
+
+    if (!helperShown) {
+      fetch("/chatbot/get-response/", { method: "GET" })
+        .then(res => res.json())
+        .then(data => {
+          openChatbot();
+          appendMessage(data.response, false);
+          sessionStorage.setItem("chatbotHelperShown", "true"); 
+        });
+    } else if (isOpen) {
+      openChatbot();
+    } else {
+      closeChatbot();
+    }
   });
 
   const logoutLink = document.getElementById("logout-link");
