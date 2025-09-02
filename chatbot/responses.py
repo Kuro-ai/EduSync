@@ -19,9 +19,9 @@ RESPONSES = {
     # Help overview
     "help": (
         "I can guide you with things like:\n\n"
-        "📌 'Account' → login, signup, verification, reset password\n"
-        "📌 'Courses' → create course, add modules/lessons/quizzes\n"
-        "📌 'Learning' → take quizzes, earn certificates\n"
+        "📌 'Account' → login, signup, login failed, email verification, reset password\n"
+        "📌 'Courses' → create course, add module/lesson/quiz/question\n"
+        "📌 'Learning' → take quiz, certificate\n"
         "📌 'Info' → privacy, terms, support\n\n"
         "Just type what you're curious about, and I’ll help!"
     ),
@@ -65,6 +65,9 @@ RESPONSES = {
     "add question": (
         "When you create a quiz, you'll be prompted to add questions. "
         "To add more later, go to 'View Quiz' → 'Add Question'."
+    ),
+    "take quiz": (
+        "To take a quiz, navigate to the quiz section of your course and click 'Take Quiz'."
     ),
 
     # Certificates
