@@ -216,29 +216,28 @@
   const chatbotSend = document.getElementById("chatbot-send");
   const chatbotInput = document.getElementById("chatbot-input");
   const chatbotMessages = document.getElementById("chatbot-messages");
+  const chatbotClose = document.getElementById("chatbot-close");
+
 
   function loadChatHistory() {
     const history = JSON.parse(localStorage.getItem("chatbotHistory") || "[]");
     chatbotMessages.innerHTML = "";
     history.forEach(({ text, isUser }) => {
-      const msg = document.createElement("div");
-      msg.className = isUser ? "text-right text-indigo-700" : "text-left text-gray-700";
-      msg.innerText = text;
-      chatbotMessages.appendChild(msg);
+      appendMessage(text, isUser, false);
     });
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
   }
 
-  function addMessage(text, isUser) {
-    const msgWrapper = document.createElement("div");
-    msgWrapper.className = isUser ? "flex justify-end" : "flex justify-start";
+  function appendMessage(text, isUser, save = true) {
+    const wrapper = document.createElement("div");
+    wrapper.className = isUser ? "flex justify-end mb-2" : "flex justify-start mb-2";
 
-    const msgBubble = document.createElement("div");
-    msgBubble.className = `
+    const bubble = document.createElement("div");
+    bubble.className = `
       max-w-[80%] px-4 py-2 rounded-lg shadow
       ${isUser
-        ? "bg-indigo-100 text-indigo-800 self-end text-right"
-        : "bg-white text-gray-800 border border-gray-200 self-start text-left"}
+        ? "bg-indigo-100 text-indigo-800 text-right"
+        : "bg-white text-gray-800 border border-gray-200 text-left"}
     `;
 
     const label = document.createElement("div");
@@ -246,26 +245,26 @@
     label.textContent = isUser ? "You" : "Bot";
 
     const msgText = document.createElement("div");
-    msgText.textContent = text;
     msgText.className = "whitespace-pre-wrap break-words";
+    msgText.textContent = text;
 
-    msgBubble.appendChild(label);
-    msgBubble.appendChild(msgText);
-    msgWrapper.appendChild(msgBubble);
-    chatbotMessages.appendChild(msgWrapper);
-
+    bubble.appendChild(label);
+    bubble.appendChild(msgText);
+    wrapper.appendChild(bubble);
+    chatbotMessages.appendChild(wrapper);
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 
-    const history = JSON.parse(localStorage.getItem("chatbotHistory") || "[]");
-    history.push({ text, isUser });
-    localStorage.setItem("chatbotHistory", JSON.stringify(history));
+    if (save) {
+      const history = JSON.parse(localStorage.getItem("chatbotHistory") || "[]");
+      history.push({ text, isUser });
+      localStorage.setItem("chatbotHistory", JSON.stringify(history));
+    }
   }
-
 
   function sendMessage() {
     const message = chatbotInput.value.trim();
     if (!message) return;
-    addMessage(message, true);
+    appendMessage(message, true);
     chatbotInput.value = "";
 
     fetch("/chatbot/get-response/", {
@@ -274,97 +273,66 @@
         "Content-Type": "application/json",
         "X-CSRFToken": getCSRFToken(),
       },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message }),
     })
-    .then(response => response.json())
-    .then(data => {
-      addMessage(data.response, false);
-    });
+      .then(res => res.json())
+      .then(data => {
+        appendMessage(data.response, false);
+      });
   }
 
   function getCSRFToken() {
-    const name = "csrftoken";
-    const cookies = document.cookie.split("; ");
-    for (const cookie of cookies) {
-      if (cookie.startsWith(name + "=")) {
-        return decodeURIComponent(cookie.split("=")[1]);
-      }
-    }
-    return "";
+    return document.cookie
+      .split("; ")
+      .find(row => row.startsWith("csrftoken="))
+      ?.split("=")[1];
   }
 
-  chatbotToggle.addEventListener("click", () => {
-  chatbotWindow.classList.remove("hidden");
-  chatbotToggle.classList.add("hidden");
-  localStorage.setItem('chatbotWindowOpen', true);
-
-  if (!localStorage.getItem("chatbotHistory")) {
-      fetch("/chatbot/get-response/", { method: "GET" })
-        .then(res => res.json())
-        .then(data => {
-          addMessage(data.response, false);
-        });
-    }
-  });
-
-  const chatbotClose = document.getElementById("chatbot-close");
-  if (chatbotClose) {
-    chatbotClose.addEventListener("click", () => {
-      chatbotWindow.classList.add("hidden");
-      chatbotToggle.classList.remove("hidden");  
-      localStorage.setItem('chatbotWindowOpen', false);
-    });
+  function openChatbot() {
+    chatbotWindow.classList.remove("hidden");
+    chatbotToggle.classList.add("hidden");
+    localStorage.setItem("chatbotWindowOpen", true);
+    chatbotInput.focus();
   }
 
-  window.addEventListener('load', () => {
-    loadChatHistory();
+  function closeChatbot() {
+    chatbotWindow.classList.add("hidden");
+    chatbotToggle.classList.remove("hidden");
+    localStorage.setItem("chatbotWindowOpen", false);
+  }
 
-    const isOpen = localStorage.getItem('chatbotWindowOpen') === 'true';
-    if (isOpen) {
-      chatbotWindow.classList.remove('hidden');
-      chatbotToggle.classList.add('hidden');  
-    } else {
-      chatbotWindow.classList.add('hidden');
-      chatbotToggle.classList.remove('hidden');  
-    }
-  });
-
+  chatbotToggle.addEventListener("click", openChatbot);
+  chatbotClose.addEventListener("click", closeChatbot);
   chatbotSend.addEventListener("click", sendMessage);
-  chatbotInput.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") sendMessage();
+  chatbotInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+
+  window.addEventListener("load", () => {
+    loadChatHistory();
+    const isOpen = localStorage.getItem("chatbotWindowOpen") === "true";
+    if (isOpen) openChatbot();
+    else closeChatbot();
   });
 
-  const logoutLink = document.getElementById('logout-link');
+  const logoutLink = document.getElementById("logout-link");
   if (logoutLink) {
-    logoutLink.addEventListener('click', () => {
-      localStorage.removeItem('chatbotHistory');
-      localStorage.removeItem('chatbotWindowOpen');
+    logoutLink.addEventListener("click", () => {
+      localStorage.removeItem("chatbotHistory");
+      localStorage.removeItem("chatbotWindowOpen");
     });
   }
 
-  let inactivityTime = function () {
-    let timer;
-
-    function clearHistoryAndLogout() {
-      localStorage.removeItem('chatbotHistory');
-      localStorage.removeItem('chatbotWindowOpen');
-      alert("You have been inactive for 15 minutes. Logging out for security reasons.");
+  let inactivityTimer;
+  function resetInactivity() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      localStorage.removeItem("chatbotHistory");
+      localStorage.removeItem("chatbotWindowOpen");
+      alert("You have been inactive for 15 minutes. Logging out.");
       window.location.href = "{% url 'logout' %}";
-    }
-
-    function resetTimer() {
-      clearTimeout(timer);
-      timer = setTimeout(clearHistoryAndLogout, 15 * 60 * 1000);
-    }
-
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.ontouchstart = resetTimer;
-    document.onclick = resetTimer;
-  };
-
-  inactivityTime();
+    }, 15 * 60 * 1000);
+  }
+  ["mousemove","keypress","click","touchstart"].forEach(evt => document.addEventListener(evt, resetInactivity));
+  resetInactivity();
 </script>
 
 </body>
